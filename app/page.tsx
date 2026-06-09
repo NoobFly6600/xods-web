@@ -230,7 +230,7 @@ export default function Home() {
             <br />
             by building and
             <br />
-            distributing AI.
+            distributing AI
           </h1>
 
           <div
