@@ -5,18 +5,22 @@ import { useEffect, useRef, useState } from "react";
 export default function Home() {
   const [scrollY, setScrollY] = useState(0);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isMobile, setIsMobile] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
-    const handleMouse = (e: MouseEvent) => {
+    const handleMouse = (e: MouseEvent) =>
       setMousePos({ x: e.clientX, y: e.clientY });
-    };
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
     window.addEventListener("scroll", handleScroll);
     window.addEventListener("mousemove", handleMouse);
+    window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("mousemove", handleMouse);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -49,19 +53,21 @@ export default function Home() {
         minHeight: "100vh",
       }}
     >
-      {/* Radial glow that follows mouse */}
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          pointerEvents: "none",
-          zIndex: 0,
-          background: `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255,255,255,0.04) 0%, transparent 70%)`,
-        }}
-      />
+      {/* Radial glow — desktop only */}
+      {!isMobile && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            pointerEvents: "none",
+            zIndex: 0,
+            background: `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255,255,255,0.04) 0%, transparent 70%)`,
+          }}
+        />
+      )}
 
       {/* NAV */}
       <nav
@@ -74,12 +80,12 @@ export default function Home() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "24px 48px",
+          padding: isMobile ? "20px 24px" : "24px 48px",
           borderBottom:
             scrollY > 40
               ? "1px solid rgba(255,255,255,0.08)"
               : "1px solid transparent",
-          backgroundColor: scrollY > 40 ? "rgba(0,0,0,0.85)" : "transparent",
+          backgroundColor: scrollY > 40 ? "rgba(0,0,0,0.9)" : "transparent",
           backdropFilter: scrollY > 40 ? "blur(12px)" : "none",
           transition: "all 0.3s ease",
         }}
@@ -94,28 +100,36 @@ export default function Home() {
         >
           XODS
         </span>
-        <div style={{ display: "flex", gap: "40px", alignItems: "center" }}>
-          {["Mission", "Services", "Contact"].map((item) => (
-            <span
-              key={item}
-              style={{
-                fontSize: "13px",
-                color: "rgba(255,255,255,0.5)",
-                letterSpacing: "0.06em",
-                cursor: "pointer",
-                transition: "color 0.2s",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.color = "rgba(255,255,255,0.5)")
-              }
-            >
-              {item}
-            </span>
-          ))}
+        <div
+          style={{
+            display: "flex",
+            gap: isMobile ? "0" : "40px",
+            alignItems: "center",
+          }}
+        >
+          {!isMobile &&
+            ["Mission", "Services", "Contact"].map((item) => (
+              <span
+                key={item}
+                style={{
+                  fontSize: "13px",
+                  color: "rgba(255,255,255,0.5)",
+                  letterSpacing: "0.06em",
+                  cursor: "pointer",
+                  transition: "color 0.2s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.color = "rgba(255,255,255,0.5)")
+                }
+              >
+                {item}
+              </span>
+            ))}
           <button
             style={{
-              padding: "10px 20px",
+              padding: isMobile ? "8px 16px" : "10px 20px",
+              marginLeft: isMobile ? "0" : "16px",
               backgroundColor: "#fff",
               color: "#000",
               border: "none",
@@ -123,10 +137,11 @@ export default function Home() {
               fontWeight: 600,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
+              borderRadius: "999px",
               cursor: "pointer",
             }}
           >
-            Get in touch
+            {isMobile ? "Contact" : "Get in touch"}
           </button>
         </div>
       </nav>
@@ -140,13 +155,14 @@ export default function Home() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          padding: "0 48px",
-          paddingTop: "120px",
+          padding: isMobile ? "0 24px" : "0 48px",
+          paddingTop: isMobile ? "100px" : "120px",
+          paddingBottom: isMobile ? "80px" : "0",
           zIndex: 1,
           overflow: "hidden",
         }}
       >
-        {/* Grid lines background */}
+        {/* Grid lines */}
         <div
           style={{
             position: "absolute",
@@ -162,20 +178,6 @@ export default function Home() {
           }}
         />
 
-        {/* Horizontal line accent */}
-        <div
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: 0,
-            right: 0,
-            height: "1px",
-            background:
-              "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
-            zIndex: 0,
-          }}
-        />
-
         <div style={{ position: "relative", zIndex: 1, maxWidth: "1200px" }}>
           <div
             style={{
@@ -183,7 +185,7 @@ export default function Home() {
               letterSpacing: "0.2em",
               color: "rgba(255,255,255,0.35)",
               textTransform: "uppercase",
-              marginBottom: "32px",
+              marginBottom: "24px",
               display: "flex",
               alignItems: "center",
               gap: "12px",
@@ -196,6 +198,7 @@ export default function Home() {
                 height: "6px",
                 borderRadius: "50%",
                 backgroundColor: "#fff",
+                flexShrink: 0,
                 animation: "pulse 2s ease-in-out infinite",
               }}
             />
@@ -204,12 +207,13 @@ export default function Home() {
 
           <h1
             style={{
-              fontSize: "clamp(48px, 8vw, 120px)",
+              fontSize: isMobile
+                ? "clamp(40px, 12vw, 64px)"
+                : "clamp(48px, 8vw, 120px)",
               fontWeight: 700,
               lineHeight: 1.0,
               letterSpacing: "-0.03em",
-              margin: 0,
-              marginBottom: "40px",
+              margin: "0 0 32px 0",
             }}
           >
             To accelerate
@@ -218,7 +222,7 @@ export default function Home() {
             <span
               style={{
                 color: "transparent",
-                WebkitTextStroke: "1px rgba(255,255,255,0.4)",
+                WebkitTextStroke: "2px #fff",
               }}
             >
               of AGI
@@ -232,14 +236,14 @@ export default function Home() {
           <div
             style={{
               display: "flex",
-              gap: "16px",
+              gap: "12px",
               alignItems: "center",
               flexWrap: "wrap",
             }}
           >
             <button
               style={{
-                padding: "16px 36px",
+                padding: isMobile ? "14px 28px" : "16px 36px",
                 backgroundColor: "#fff",
                 color: "#000",
                 border: "none",
@@ -247,6 +251,7 @@ export default function Home() {
                 fontWeight: 600,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
+                borderRadius: "999px",
                 cursor: "pointer",
               }}
             >
@@ -254,7 +259,7 @@ export default function Home() {
             </button>
             <button
               style={{
-                padding: "16px 36px",
+                padding: isMobile ? "14px 28px" : "16px 36px",
                 backgroundColor: "transparent",
                 color: "#fff",
                 border: "1px solid rgba(255,255,255,0.2)",
@@ -262,6 +267,7 @@ export default function Home() {
                 fontWeight: 500,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
+                borderRadius: "999px",
                 cursor: "pointer",
               }}
             >
@@ -270,49 +276,51 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: "40px",
-            left: "48px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "8px",
-            alignItems: "flex-start",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "10px",
-              color: "rgba(255,255,255,0.25)",
-              letterSpacing: "0.15em",
-            }}
-          >
-            SCROLL
-          </span>
+        {/* Scroll indicator — desktop only */}
+        {!isMobile && (
           <div
             style={{
-              width: "1px",
-              height: "48px",
-              backgroundColor: "rgba(255,255,255,0.15)",
-              position: "relative",
-              overflow: "hidden",
+              position: "absolute",
+              bottom: "40px",
+              left: "48px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "8px",
+              alignItems: "flex-start",
             }}
           >
+            <span
+              style={{
+                fontSize: "10px",
+                color: "rgba(255,255,255,0.25)",
+                letterSpacing: "0.15em",
+              }}
+            >
+              SCROLL
+            </span>
             <div
               style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                backgroundColor: "#fff",
-                animation: "scrollLine 1.8s ease-in-out infinite",
-                height: "40%",
+                width: "1px",
+                height: "48px",
+                backgroundColor: "rgba(255,255,255,0.15)",
+                position: "relative",
+                overflow: "hidden",
               }}
-            />
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  backgroundColor: "#fff",
+                  animation: "scrollLine 1.8s ease-in-out infinite",
+                  height: "40%",
+                }}
+              />
+            </div>
           </div>
-        </div>
+        )}
       </section>
 
       {/* STATS BAR */}
@@ -321,7 +329,7 @@ export default function Home() {
           borderTop: "1px solid rgba(255,255,255,0.08)",
           borderBottom: "1px solid rgba(255,255,255,0.08)",
           display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
+          gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
           position: "relative",
           zIndex: 1,
         }}
@@ -330,9 +338,13 @@ export default function Home() {
           <div
             key={i}
             style={{
-              padding: "48px",
+              padding: isMobile ? "32px 24px" : "48px",
               borderRight:
-                i < stats.length - 1
+                !isMobile && i < stats.length - 1
+                  ? "1px solid rgba(255,255,255,0.08)"
+                  : "none",
+              borderBottom:
+                isMobile && i < stats.length - 1
                   ? "1px solid rgba(255,255,255,0.08)"
                   : "none",
               display: "flex",
@@ -342,7 +354,7 @@ export default function Home() {
           >
             <span
               style={{
-                fontSize: "clamp(36px, 5vw, 64px)",
+                fontSize: isMobile ? "48px" : "clamp(36px, 5vw, 64px)",
                 fontWeight: 700,
                 letterSpacing: "-0.03em",
                 lineHeight: 1,
@@ -366,7 +378,11 @@ export default function Home() {
 
       {/* SERVICES */}
       <section
-        style={{ padding: "120px 48px", position: "relative", zIndex: 1 }}
+        style={{
+          padding: isMobile ? "64px 24px" : "120px 48px",
+          position: "relative",
+          zIndex: 1,
+        }}
       >
         <div
           style={{
@@ -374,7 +390,7 @@ export default function Home() {
             letterSpacing: "0.2em",
             color: "rgba(255,255,255,0.3)",
             textTransform: "uppercase",
-            marginBottom: "64px",
+            marginBottom: "48px",
           }}
         >
           What we do
@@ -383,7 +399,7 @@ export default function Home() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
+            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
             gap: "1px",
             backgroundColor: "rgba(255,255,255,0.08)",
           }}
@@ -393,7 +409,7 @@ export default function Home() {
               key={i}
               style={{
                 backgroundColor: "#000",
-                padding: "64px 48px",
+                padding: isMobile ? "40px 24px" : "64px 48px",
                 position: "relative",
                 overflow: "hidden",
                 cursor: "pointer",
@@ -413,7 +429,7 @@ export default function Home() {
                   fontSize: "10px",
                   letterSpacing: "0.2em",
                   color: "rgba(255,255,255,0.25)",
-                  marginBottom: "32px",
+                  marginBottom: "24px",
                   textTransform: "uppercase",
                 }}
               >
@@ -421,12 +437,11 @@ export default function Home() {
               </div>
               <h2
                 style={{
-                  fontSize: "clamp(24px, 3vw, 40px)",
+                  fontSize: isMobile ? "28px" : "clamp(24px, 3vw, 40px)",
                   fontWeight: 600,
                   letterSpacing: "-0.02em",
                   lineHeight: 1.15,
-                  marginBottom: "24px",
-                  margin: "0 0 24px 0",
+                  margin: "0 0 20px 0",
                 }}
               >
                 {s.title}
@@ -436,19 +451,15 @@ export default function Home() {
                   fontSize: "15px",
                   color: "rgba(255,255,255,0.45)",
                   lineHeight: 1.7,
-                  maxWidth: "400px",
-                  margin: 0,
+                  margin: "0 0 40px 0",
                 }}
               >
                 {s.body}
               </p>
               <div
                 style={{
-                  position: "absolute",
-                  bottom: "40px",
-                  right: "40px",
                   fontSize: "20px",
-                  color: "rgba(255,255,255,0.15)",
+                  color: "rgba(255,255,255,0.2)",
                 }}
               >
                 →
@@ -466,6 +477,9 @@ export default function Home() {
           overflow: "hidden",
           padding: "20px 0",
           whiteSpace: "nowrap",
+          fontSize: isMobile ? "12px" : "14px",
+          letterSpacing: "0.05em",
+          color: "rgba(255,255,255,0.4)",
         }}
       >
         <div
@@ -485,12 +499,12 @@ export default function Home() {
       {/* BELIEF SECTION */}
       <section
         style={{
-          padding: "120px 48px",
+          padding: isMobile ? "64px 24px" : "120px 48px",
           position: "relative",
           zIndex: 1,
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "80px",
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+          gap: isMobile ? "48px" : "80px",
           alignItems: "center",
         }}
       >
@@ -501,18 +515,20 @@ export default function Home() {
               letterSpacing: "0.2em",
               color: "rgba(255,255,255,0.3)",
               textTransform: "uppercase",
-              marginBottom: "32px",
+              marginBottom: "24px",
             }}
           >
             We believe
           </div>
           <h2
             style={{
-              fontSize: "clamp(32px, 4vw, 56px)",
+              fontSize: isMobile
+                ? "clamp(28px, 8vw, 40px)"
+                : "clamp(32px, 4vw, 56px)",
               fontWeight: 700,
               letterSpacing: "-0.03em",
               lineHeight: 1.1,
-              margin: "0 0 32px 0",
+              margin: 0,
             }}
           >
             AGI is not a question
@@ -529,9 +545,11 @@ export default function Home() {
           style={{
             display: "flex",
             flexDirection: "column",
-            gap: "32px",
-            borderLeft: "1px solid rgba(255,255,255,0.08)",
-            paddingLeft: "80px",
+            gap: "24px",
+            borderLeft: isMobile ? "none" : "1px solid rgba(255,255,255,0.08)",
+            borderTop: isMobile ? "1px solid rgba(255,255,255,0.08)" : "none",
+            paddingLeft: isMobile ? "0" : "80px",
+            paddingTop: isMobile ? "48px" : "0",
           }}
         >
           {[
@@ -546,7 +564,7 @@ export default function Home() {
                 color: "rgba(255,255,255,0.45)",
                 lineHeight: 1.75,
                 margin: 0,
-                paddingBottom: "32px",
+                paddingBottom: "24px",
                 borderBottom:
                   i < 2 ? "1px solid rgba(255,255,255,0.06)" : "none",
               }}
@@ -561,7 +579,7 @@ export default function Home() {
       <section
         style={{
           borderTop: "1px solid rgba(255,255,255,0.08)",
-          padding: "120px 48px",
+          padding: isMobile ? "80px 24px" : "120px 48px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -571,11 +589,10 @@ export default function Home() {
           overflow: "hidden",
         }}
       >
-        {/* Large background text */}
         <div
           style={{
             position: "absolute",
-            fontSize: "clamp(120px, 20vw, 280px)",
+            fontSize: "clamp(80px, 20vw, 280px)",
             fontWeight: 800,
             color: "rgba(255,255,255,0.02)",
             letterSpacing: "-0.05em",
@@ -596,18 +613,20 @@ export default function Home() {
             letterSpacing: "0.2em",
             color: "rgba(255,255,255,0.3)",
             textTransform: "uppercase",
-            marginBottom: "32px",
+            marginBottom: "24px",
           }}
         >
           Ready to move faster?
         </div>
         <h2
           style={{
-            fontSize: "clamp(32px, 5vw, 72px)",
+            fontSize: isMobile
+              ? "clamp(28px, 8vw, 40px)"
+              : "clamp(32px, 5vw, 72px)",
             fontWeight: 700,
             letterSpacing: "-0.03em",
             lineHeight: 1.05,
-            margin: "0 0 48px 0",
+            margin: "0 0 40px 0",
             maxWidth: "800px",
           }}
         >
@@ -615,7 +634,7 @@ export default function Home() {
         </h2>
         <button
           style={{
-            padding: "20px 48px",
+            padding: "18px 40px",
             backgroundColor: "#fff",
             color: "#000",
             border: "none",
@@ -623,6 +642,7 @@ export default function Home() {
             fontWeight: 700,
             letterSpacing: "0.1em",
             textTransform: "uppercase",
+            borderRadius: "999px",
             cursor: "pointer",
           }}
         >
@@ -634,10 +654,12 @@ export default function Home() {
       <footer
         style={{
           borderTop: "1px solid rgba(255,255,255,0.08)",
-          padding: "48px",
+          padding: isMobile ? "40px 24px" : "48px",
           display: "flex",
+          flexDirection: isMobile ? "column" : "row",
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: isMobile ? "flex-start" : "center",
+          gap: isMobile ? "24px" : "0",
           position: "relative",
           zIndex: 1,
         }}
@@ -652,7 +674,13 @@ export default function Home() {
         >
           XODS
         </span>
-        <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.2)" }}>
+        <span
+          style={{
+            fontSize: "12px",
+            color: "rgba(255,255,255,0.2)",
+            order: isMobile ? 3 : 0,
+          }}
+        >
           © 2026. To accelerate the advent of AGI.
         </span>
         <div style={{ display: "flex", gap: "32px" }}>
@@ -674,7 +702,6 @@ export default function Home() {
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
         * { box-sizing: border-box; }
         body { margin: 0; }
 
@@ -682,23 +709,17 @@ export default function Home() {
           0%, 100% { opacity: 1; transform: scale(1); }
           50% { opacity: 0.4; transform: scale(0.7); }
         }
-
         @keyframes scrollLine {
           0% { transform: translateY(-100%); opacity: 0; }
           30% { opacity: 1; }
           70% { opacity: 1; }
           100% { transform: translateY(250%); opacity: 0; }
         }
-
         @keyframes marquee {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }
         }
-
-        button:hover {
-          opacity: 0.85;
-          transition: opacity 0.2s;
-        }
+        button:hover { opacity: 0.85; transition: opacity 0.2s; }
       `}</style>
     </div>
   );
